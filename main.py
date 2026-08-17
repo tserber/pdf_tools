@@ -2,8 +2,11 @@ import argparse
 import logging
 import sys
 
-from extract.pdf_table_extractor import extract_tables
-from load.excel.excel_loader import load_tables_to_excel
+from tools.pdf_to_excel_tool import PdfToExcelTool
+
+TOOLS = {
+    PdfToExcelTool.name: PdfToExcelTool,
+}
 
 logging.basicConfig(
     level=logging.INFO,
@@ -13,18 +16,16 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Extract PDF tables into an Excel workbook.")
-    parser.add_argument("pdf_path", help="Path to the source PDF file")
-    parser.add_argument("output_path", help="Path to the output .xlsx file")
+    parser = argparse.ArgumentParser(description="pdf_tools: extract, transform, load command line tools.")
+    subparsers = parser.add_subparsers(dest="tool", required=True)
+
+    for tool_name, tool_cls in TOOLS.items():
+        tool_parser = subparsers.add_parser(tool_name, help=tool_cls.description)
+        tool_cls.add_arguments(tool_parser)
+
     args = parser.parse_args()
-
-    tables = extract_tables(args.pdf_path)
-    if not tables:
-        logger.warning("No tables found in %s", args.pdf_path)
-        return 1
-
-    load_tables_to_excel(tables, args.output_path)
-    return 0
+    tool = TOOLS[args.tool].from_args(args)
+    return tool.run()
 
 
 if __name__ == "__main__":
