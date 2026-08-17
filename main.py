@@ -2,10 +2,12 @@ import argparse
 import logging
 import sys
 
+from tools.docx_fill_tool import DocxFillTool
 from tools.pdf_to_excel_tool import PdfToExcelTool
 
 TOOLS = {
     PdfToExcelTool.name: PdfToExcelTool,
+    DocxFillTool.name: DocxFillTool,
 }
 
 logging.basicConfig(
